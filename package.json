@@ -15,5 +15,13 @@
   "bugs": {
     "url": "https://github.com/sxxlearn2rock/HelloVue2Webpack4/issues"
   },
-  "homepage": "https://github.com/sxxlearn2rock/HelloVue2Webpack4#readme"
+  "homepage": "https://github.com/sxxlearn2rock/HelloVue2Webpack4#readme",
+  "dependencies": {
+    "vue": "^2.5.16",
+    "vue-router": "^3.0.1"
+  },
+  "devDependencies": {
+    "webpack": "^4.8.3",
+    "webpack-cli": "^2.1.4"
+  }
 }
