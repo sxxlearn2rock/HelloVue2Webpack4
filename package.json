@@ -1,0 +1,19 @@
+{
+  "name": "hello_vue2_webpack4",
+  "version": "1.0.0",
+  "description": "use vue2 and build with webpack4",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sxxlearn2rock/HelloVue2Webpack4.git"
+  },
+  "author": "samsang",
+  "license": "",
+  "bugs": {
+    "url": "https://github.com/sxxlearn2rock/HelloVue2Webpack4/issues"
+  },
+  "homepage": "https://github.com/sxxlearn2rock/HelloVue2Webpack4#readme"
+}
