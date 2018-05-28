@@ -19,42 +19,118 @@ import $ from 'jquery';
 
 export default {
   props: {
+    // 被覆盖水印的目标元素的id
     targetId: {
       required: true
-    }
+    },
+    // 水印文字
+    text: "",
+    // 是否开启修改防护
+    modifyProtect: true,
+    // 是否开启删除防护
+    removeProtect: true,
+    // 水印图案的用户配置项
+    canvasUserOptions: Object,
+    // 水印元素的用户配置项
+    wmUserOptions: Object
   },
   data() {
     return {
+      // 水印元素的id
       watermarkId: "",
+      // 水印图案，由canvas生成的url
       url: "",
       // 被覆盖水印的目标元素
       $target: undefined,
       // 水印元素
-      $wm: undefined
+      $wm: undefined,
+      canvasOptions: {
+        width: 320,
+        height: 240,
+        fillStyle: "rgba(204,204,204,0.45)",
+        font: "36px Times New Roman",
+        rotateDegree: 30,
+        fillText: {
+          text: "watermark",
+          x: 20,
+          y: 20,
+          maxWidth: undefined
+        }
+      },
+      wmOptions: {
+        "z-index": -1
+      }
     }
   },
   methods: {
+    /**
+     * [init 进行一些初始化操作]
+     * @return {[type]} [description]
+     */
     init() {
+      // 生成水印元素的id，用于监控该元素是否被删除
       this.watermarkId = this.targetId + "_watermark_xx512";
+      // 获取到目标元素
       this.$target = $('#' + this.targetId);
+      // 生成水印图案的配置项
+      this.createCanvasOption();
+      // 生成水印元素的配置项
+      this.createWmOption();
+      // 生成水印图案的url
       this.url = this.createCanvasDataUrl();
     },
+    /**
+     * [addWatermark 添加水印]
+     */
     addWatermark() {
       this.addWatermarkToTarget();
       this.observeWaterMark();
     },
+
+    /**
+     * [createCanvasOption 根据用户传入的参数，生成水印图案的配置项]
+     * @return {[type]} [description]
+     */
+    createCanvasOption() {
+      for (let key in this.canvasUserOptions) {
+        if (this.canvasOptions.hasOwnProperty(key)) {
+          this.canvasOptions[key] = this.canvasUserOptions[key];
+        }
+      }
+    },
+
+    /**
+     * [createWmOption 根据用户传入的参数，生成水印元素的配置项]
+     * @return {[type]} [description]
+     */
+    createWmOption() {
+      for (let key in this.wmUserOptions) {
+        if (this.wmOptions.hasOwnProperty(key)) {
+          this.wmOptions[key] = this.wmUserOptions[key];
+        }
+      }
+    },
+
+    /**
+     * [createCanvasDataUrl 生成水印图案的url]
+     * @return {[type]} [description]
+     */
     createCanvasDataUrl() {
       // 创建canvas
       let canvas = document.createElement('canvas');
-      canvas.width = 320;
-      canvas.height = 240;
+      canvas.width = this.canvasOptions.width;
+      canvas.height = this.canvasOptions.height;
       let ctx = canvas.getContext('2d');
-      ctx.fillStyle = "rgba(204,204,204,0.45)";
-      ctx.font = "36px Times New Roman";
-      ctx.rotate(30 * Math.PI / 180);
+      ctx.fillStyle = this.canvasOptions.fillStyle;
+      ctx.font = this.canvasOptions.font;
+      ctx.rotate(this.canvasOptions.rotateDegree * Math.PI / 180);
       ctx.fillText("samsang", 20, 20);
       return canvas.toDataURL('image/png');
     },
+
+    /**
+     * [addWatermarkToTarget 在目标元素上面添加水印层，这种方式没有直接修改目标元素的background，这样可以单独操纵水印元素]
+     */
     addWatermarkToTarget() {
       // 创建水印覆盖目标元素
       let $wm = $(document.createElement('div'));
@@ -65,8 +141,10 @@ export default {
       $wm.css('position', 'absolute');
       $wm.css('top', '0');
       $wm.css('left', '0');  
-      $wm.css('z-index', '-1');
       $wm.css('pointer-events', 'none');
+      for (let key in this.wmOptions) {
+        $wm.css(key, this.wmOptions[key]);
+      }
       $wm.css('background', 'url(' + this.url + ') repeat top left');
       this.$wm = $wm;
       this.$target.append($wm);
@@ -88,8 +166,8 @@ export default {
         for (let m of mutations) {
           // 先取消监听，避免死循环
           observer.disconnect();
-          console.log('mutation observed!')
-          console.log(m);
+console.log('mutation observed!')
+console.log(m);
           this.resetWatermark();
           // 重新监听元素
           observer.observe(this.$wm[0], obConfig);
@@ -103,8 +181,8 @@ export default {
           if(m.type === 'childList' && m.removedNodes.length > 0) {
             for (let n of m.removedNodes) {
               if (n.id == this.watermarkId) {
-                console.log('delete mutation observed!')
-                console.log(m);
+console.log('delete mutation observed!')
+console.log(m);
                 pObserver.disconnect();
                 this.addWatermarkToTarget();
                 this.observeWaterMark();
