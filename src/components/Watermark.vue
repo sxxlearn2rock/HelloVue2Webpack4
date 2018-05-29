@@ -2,10 +2,6 @@
 .component-wrapper {
   width: 100%;
   height: 100%;
-  #info {
-    height: 2500px;
-    border: 1px solid #aaa;
-  }
 }  
 </style>
 
@@ -15,8 +11,6 @@
 </template>
 
 <script lang="babel">
-import $ from 'jquery';
-
 export default {
   props: {
     // 被覆盖水印的目标元素的id
@@ -32,7 +26,10 @@ export default {
     // 水印图案的用户配置项
     canvasUserOptions: Object,
     // 水印元素的用户配置项
-    wmUserOptions: Object
+    wmUserOptions: Object,
+    // 是否手动初始化
+    // 因为水印元素依赖于目标元素，如果目标元素没有渲染完成，那么水印元素不能正常工作，所以用户可根据实际情况进行手动初始化
+    isManualInit: false
   },
   data() {
     return {
@@ -44,10 +41,11 @@ export default {
       $target: undefined,
       // 水印元素
       $wm: undefined,
+      // 水印图案的配置项
       canvasOptions: {
         width: 320,
         height: 240,
-        fillStyle: "rgba(204,204,204,0.45)",
+        fillStyle: "rgba(200,200,200,0.4)",
         font: "36px Times New Roman",
         rotateDegree: 30,
         fillText: {
@@ -57,8 +55,9 @@ export default {
           maxWidth: undefined
         }
       },
+      // 水印元素的配置项
       wmOptions: {
-        "z-index": -1
+        "z-index": 999
       }
     }
   },
@@ -69,6 +68,7 @@ export default {
      */
     init() {
       // 生成水印元素的id，用于监控该元素是否被删除
+      // 后缀是为了增强id随机性
       this.watermarkId = this.targetId + "_watermark_xx512";
       // 获取到目标元素
       this.$target = $('#' + this.targetId);
@@ -79,6 +79,7 @@ export default {
       // 生成水印图案的url
       this.url = this.createCanvasDataUrl();
     },
+
     /**
      * [addWatermark 添加水印]
      */
@@ -137,7 +138,6 @@ export default {
       $wm.attr('id', this.watermarkId);
       $wm.width('100%');
       $wm.height('100%');
-      $wm.css('background', '#cba');
       $wm.css('position', 'absolute');
       $wm.css('top', '0');
       $wm.css('left', '0');  
@@ -176,6 +176,7 @@ console.log(m);
       observer.observe(this.$wm[0], obConfig);
 
       // 进一步加强监控，防止元素被删除
+      // 因为
       let pObserver = new MutationObserver((mutations, observer) => {
         for (let m of mutations) {
           if(m.type === 'childList' && m.removedNodes.length > 0) {
@@ -197,22 +198,38 @@ console.log(m);
       };
       pObserver.observe(this.$target[0], pObConfig);
     },
+    /**
+     * [resetWatermark 重置水印的样式]
+     * @return {[type]} [description]
+     */
     resetWatermark() {
       this.$wm.attr('id', this.watermarkId);
       this.$wm.width('100%');
       this.$wm.height('100%');
-      this.$wm.css('background', '#cba');
       this.$wm.css('position', 'absolute');
       this.$wm.css('top', '0');
-      this.$wm.css('left', '0');
-      this.$wm.css('z-index', '-1');
+      this.$wm.css('left', '0');  
       this.$wm.css('pointer-events', 'none');
+      for (let key in this.wmOptions) {
+        this.$wm.css(key, this.wmOptions[key]);
+      }
       this.$wm.css('background', 'url(' + this.url + ') repeat top left');
     }
   },
+  events: {
+    'create-watermark': function(targetId) {
+      console.log(targetId)
+      if (targetId == this.targetId) {
+        this.init();
+        this.addWatermark();
+      }
+    }
+  },
   mounted() {
-    this.init();
-    this.addWatermark();
+    if (!this.isManualInit) {
+     this.init();
+     this.addWatermark(); 
+   }
   }
 }  
 </script>
