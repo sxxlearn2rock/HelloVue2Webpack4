@@ -12,7 +12,7 @@
 
 div.info {
   border: 1px solid #aaa;
-  height: 300px;
+  height: 500px;
   position: relative;
 }
 </style>

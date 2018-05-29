@@ -1,8 +1,4 @@
-<style lang="scss" scoped>
-.component-wrapper {
-  width: 100%;
-  height: 100%;
-}  
+<style lang="scss" scoped> 
 </style>
 
 <template>
@@ -47,9 +43,13 @@ export default {
         height: 240,
         fillStyle: "rgba(200,200,200,0.4)",
         font: "36px Times New Roman",
-        rotateDegree: 30,
+        translate: {
+          x: 0,
+          y: 220
+        },
+        rotateDegree: -30,
         fillText: {
-          text: "watermark",
+          text: "watermarkwatermarkwatermark",
           x: 20,
           y: 20,
           maxWidth: undefined
@@ -124,8 +124,10 @@ export default {
       let ctx = canvas.getContext('2d');
       ctx.fillStyle = this.canvasOptions.fillStyle;
       ctx.font = this.canvasOptions.font;
+      ctx.translate(this.canvasOptions.translate.x, this.canvasOptions.translate.y);
       ctx.rotate(this.canvasOptions.rotateDegree * Math.PI / 180);
-      ctx.fillText("samsang", 20, 20);
+      const f = this.canvasOptions.fillText;
+      ctx.fillText(f.text, f.x, f.y, f.maxWidth);
       return canvas.toDataURL('image/png');
     },
 
@@ -149,6 +151,7 @@ export default {
       this.$wm = $wm;
       this.$target.append($wm);
     },
+
     /**
      * [observeWaterMark 监控水印元素，从两方面防止被修改：1.属性被修改，2.元素被删除]
      * @param  {[type]} $wm      [水印元素]
@@ -168,9 +171,8 @@ export default {
           observer.disconnect();
 console.log('mutation observed!')
 console.log(m);
-          this.resetWatermark();
-          // 重新监听元素
-          observer.observe(this.$wm[0], obConfig);
+          // 此处用了一点小技巧：直接删除$wm元素，删除动作会引发下面的监控，进而重新生成元素
+          this.$wm.remove();
         }
       });
       observer.observe(this.$wm[0], obConfig);
@@ -198,23 +200,6 @@ console.log(m);
       };
       pObserver.observe(this.$target[0], pObConfig);
     },
-    /**
-     * [resetWatermark 重置水印的样式]
-     * @return {[type]} [description]
-     */
-    resetWatermark() {
-      this.$wm.attr('id', this.watermarkId);
-      this.$wm.width('100%');
-      this.$wm.height('100%');
-      this.$wm.css('position', 'absolute');
-      this.$wm.css('top', '0');
-      this.$wm.css('left', '0');  
-      this.$wm.css('pointer-events', 'none');
-      for (let key in this.wmOptions) {
-        this.$wm.css(key, this.wmOptions[key]);
-      }
-      this.$wm.css('background', 'url(' + this.url + ') repeat top left');
-    }
   },
   events: {
     'create-watermark': function(targetId) {
