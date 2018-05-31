@@ -203,7 +203,6 @@ console.log(m);
   },
   events: {
     'create-watermark': function(targetId) {
-      console.log(targetId)
       if (targetId == this.targetId) {
         this.init();
         this.addWatermark();

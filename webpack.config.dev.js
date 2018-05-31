@@ -1,14 +1,19 @@
 'use strict'
 
+const path = require('path');
 const webpack = require('webpack');
 const { VueLoaderPlugin } = require('vue-loader');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   'mode': 'development',
-  entry: [
-    './src/app.js'
-  ],
+  entry: {
+      app: './src/app.js'
+  },
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].bundle.js'
+  },
   module: {
     rules: [
       {
@@ -41,8 +46,11 @@ module.exports = {
     hot: true
   },
   plugins: [
+    // vue-loader所需插件
     new VueLoaderPlugin(),
+    // webpack-dev-server实现热重载所需插件
     new webpack.HotModuleReplacementPlugin(),
+    // 根据模板生成html，在html中插入引用打包文件的<srcipt>标签
     new HtmlWebpackPlugin({
       filename: 'index.html',
       template: 'index.html',
